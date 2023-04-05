@@ -203,6 +203,21 @@ long int PfspInstance::computeWCT(vector< int > & sol)
 	return wct;
 }
 
+long int PfspInstance::computeWT(vector<int> &sol) {
+    vector < long int > machineEndTime(nbMac);
+    vector < long int > completionTime (nbJob + 1);
+    long int weightedTardiness = 0;
+
+    for (long int mac: machineEndTime) mac = 0;
+
+    for (int i = 1; i <= nbJob; i++) {
+        completionTime[i] = 0;
+        for (long int mac: machineEndTime) {
+            completionTime[i] += max
+        }
+    }
+}
+
 long int PfspInstance::getPriority(int job) {
     return priority[job];
 }
