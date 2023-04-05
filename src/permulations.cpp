@@ -44,16 +44,26 @@ void generateExchanges(vector<int> sol) {
     }
 }
 
+void doInsert(int initial, int final, vector<int>& vec) {
+    int val = vec[initial];
+    vec.erase(vec.begin() + initial);
+    if (final > initial) {
+        final--;
+    }
+    vec.insert(vec.begin() + final, val);
+}
+
 void generateInserts(vector<int> sol) {
     vector<int> ins = sol;
 
     for (int i=0; i<sol.size(); i++) {
         for (int j=0; j <= sol.size(); j++) {
-            if (i != j) {
-                cout << i << ";" << j << endl;
-                ins.insert(ins.begin() + j, ins[i]);
-                ins.erase(ins.begin() + i);
-                printVector(ins);
+            if (i == j) continue;
+            if (j - i > 1 or i - j > 1) {
+                doInsert(i, j, ins);
+                // Do something
+
+
                 ins = sol;
             }
         }
@@ -62,10 +72,12 @@ void generateInserts(vector<int> sol) {
 
 
 int main() {
-    vector<int> a;
-    for (int i=1; i<5; ++i) {
+    vector<int> a, b;
+    for (int i=1; i<6; ++i) {
         a.push_back(i);
     }
+    b = a;
+    /*doInsert(0,1,b);
+    printVector(b);*/
     generateInserts(a);
-    cout << "Dafuk" << endl;
 }
