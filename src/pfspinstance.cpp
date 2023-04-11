@@ -23,6 +23,7 @@
 #include <fstream>
 #include <cmath>
 #include <cstring>
+#include <algorithm>
 #include "pfspinstance.h"
 
 
@@ -204,18 +205,26 @@ long int PfspInstance::computeWCT(vector< int > & sol)
 }
 
 long int PfspInstance::computeWT(vector<int> &sol) {
-    vector < long int > machineEndTime(nbMac);
-    vector < long int > completionTime (nbJob + 1);
-    long int weightedTardiness = 0;
-
-    for (long int mac: machineEndTime) mac = 0;
-
-    for (int i = 1; i <= nbJob; i++) {
-        completionTime[i] = 0;
-        for (long int mac: machineEndTime) {
-            completionTime[i] += max
+    vector < vector < long int > > computingMatrix(nbJob);
+    for (int j=0; j < nbJob; j++) {
+        computingMatrix[j] = vector<long int>(nbMac);
+        if (j==0) {
+            for (int m=0; m < nbMac; m++) {
+                if (m==0) computingMatrix[j][m] = this->getTime(sol[j],m);
+                else computingMatrix[j][m] = computingMatrix[j][m-1] + this->getTime(sol[j],m);
+            }
+        }
+        else {
+            for (int m=0; m < nbMac; m++) {
+                if(m==0) computingMatrix[j][m] = this->getTime(sol[j],m);
+                else computingMatrix[j][m] = max(computingMatrix[j-1][m], computingMatrix[j][m-1]) + this->getTime(sol[j],m);
+            }
         }
     }
+    vector<long int> completionTime = computingMatrix[nbJob-1];
+    long int totalTardiness = 0;
+    for (int j=0; j < nbJob; j++) totalTardiness += max(completionTime[j], 0)*this->getPriority(sol[j]);
+    return totalTardiness;
 }
 
 long int PfspInstance::getPriority(int job) {
