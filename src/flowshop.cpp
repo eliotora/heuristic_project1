@@ -30,6 +30,7 @@
 #include "permutations/exchange.h"
 #include "permutations/insert.h"
 #include "improvement.h"
+#include "flowshopinstance.h"
 
 using namespace std;
 
@@ -115,9 +116,9 @@ int main(int argc, char **argv)
     long int WeightedSumCompletionTimes;
 
 
-    if (argc == 1)
+    if (argc < 5)
     {
-        cout << "Usage: ./flowshopWCT <instance_file>" << endl;
+        cout << "Usage: ./flowshopWCT <instance_file> --simp|--rand --exchange|--transpose|--insert --first|--best" << endl;
         return 0;
     }
 
@@ -147,36 +148,20 @@ int main(int argc, char **argv)
         simpRZsolution(instance.getNbJob(), solution, instance);
     }
 
-    cout << "Solution: " ;
+    vector<string> parameters(2);
+    parameters[0] = argv[3];
+    parameters[1] = argv[4];
+
+    solution = {0,12,20,17,9,37,34,42,11,39,3,30,48,29,27,7,15,33,40,21,6,16,35,19,26,45,10,5,2,25,41,43,47,8,24,14,44,13,18,23,49,28,31,50,36,38,1,32,22,46,4};
+    cout << "Starting solution: " ;
     for (i = 1; i <= instance.getNbJob(); ++i)
         cout << solution[i] << " " ;
     cout << endl;
-    bool (*foo)(vector<int> sol, PfspInstance instance, long int curr_score) = &firstImprovement;
-    string p = argv[3];
-    if (p == "--tran")
-    {
-        for (int u = 0; u < 10; u++) {
-            Transpose transpose = Transpose(solution, instance, foo);
-            solution = transpose.generateTranspose(solution);
-            if (not transpose.stop) break;
-        }
-    }
-    else if (p == "--exch")
-    {
-        for (int u = 0; u < 10; u++) {
-            Exchange exchange = Exchange(solution, instance, foo);
-            solution = exchange.generateExchange(solution);
-            if (not exchange.stop) break;
-        }
-    }
-    else if (p == "--inse")
-    {
-        for (int u = 0; u < 10; u++) {
-            Insert insert = Insert(solution, instance, foo);
-            solution = insert.generateInsert(solution);
-            if (not insert.stop) break;
-        }
-    }
+
+    FlowshopInstance flowshopInstance = FlowshopInstance(solution, instance, parameters);
+    flowshopInstance.run();
+
+    solution = flowshopInstance.getCurrentSolution();
     cout << "Solution: " ;
     for (i = 1; i <= instance.getNbJob(); ++i)
         cout << solution[i] << " " ;
