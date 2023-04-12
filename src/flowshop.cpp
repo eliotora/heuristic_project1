@@ -125,11 +125,10 @@ int main(int argc, char **argv)
   /* Read data from file */
   if (! instance.readDataFromFile(argv[1]) )
     return 1;
-
   /* Create a vector of int to represent the solution
     WARNING: By convention, we store the jobs starting from index 1,
              thus the size nbJob + 1. */
-  vector< int > solution ( instance.getNbJob()+ 1 );
+    vector< int > solution ( instance.getNbJob()+ 1 );
     string s = argv[2];
     cout << s << endl;
     if (s == "--rand")
@@ -143,7 +142,6 @@ int main(int argc, char **argv)
         simpRZsolution(instance.getNbJob(), solution, instance);
     }
 
-
   cout << "Random solution: " ;
   for (i = 1; i <= instance.getNbJob(); ++i)
     cout << solution[i] << " " ;
@@ -152,6 +150,7 @@ int main(int argc, char **argv)
   /* Compute the WCT of this solution */
   WeightedSumCompletionTimes = instance.computeWCT(solution);
   cout << "Total weighted completion time: " << WeightedSumCompletionTimes << endl;
+  cout << "Total weighted tardiness: " << instance.computeWT(solution) << endl;
 
   return 0;
 }

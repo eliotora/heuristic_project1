@@ -1,3 +1,13 @@
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <cstring>
+#include <algorithm>
+#include "pfspinstance.h"
+
+
+using namespace std;
+
 /***************************************************************************
  *   Copyright (C) 2012 by Jérémie Dubois-Lacoste   *
  *   jeremie.dl@gmail.com   *
@@ -19,20 +29,20 @@
  ***************************************************************************/
 
 
-#include <iostream>
-#include <fstream>
-#include <cmath>
-#include <cstring>
-#include <algorithm>
-#include "pfspinstance.h"
+void printMatrix(vector<vector<long int>> &matrix) {
+    for (vector<long int> line: matrix) {
+        cout << "{ ";
+        for (long int element: line) {
+            cout << element << ", ";
+        }
+        cout << ";" << endl;
+    }
+}
 
-
-using namespace std;
 
 PfspInstance::PfspInstance()
 {
 }
-
 
 PfspInstance::~PfspInstance()
 {
@@ -43,11 +53,12 @@ int PfspInstance::getNbJob()
   return nbJob;
 }
 
+
+
 int PfspInstance::getNbMac()
 {
   return nbMac;
 }
-
 
 
 /* Allow the memory for the processing times matrix : */
@@ -151,7 +162,6 @@ bool PfspInstance::readDataFromFile(char * fileName)
 	return everythingOK;
 }
 
-
 /* Compute the weighted sum of completion time of a given solution */
 long int PfspInstance::computeWCT(vector< int > & sol)
 {
@@ -205,28 +215,31 @@ long int PfspInstance::computeWCT(vector< int > & sol)
 }
 
 long int PfspInstance::computeWT(vector<int> &sol) {
-    vector < vector < long int > > computingMatrix(nbJob);
-    for (int j=0; j < nbJob; j++) {
-        computingMatrix[j] = vector<long int>(nbMac);
-        if (j==0) {
-            for (int m=0; m < nbMac; m++) {
-                if (m==0) computingMatrix[j][m] = this->getTime(sol[j],m);
+    vector < vector < long int > > computingMatrix(nbJob+1);
+    for (int j=1; j <= nbJob; j++) {
+        computingMatrix[j] = vector<long int>(nbMac+1);
+        if (j==1) {
+            for (int m=1; m <= nbMac; m++) {
+                if (m==1) computingMatrix[j][m] = this->getTime(sol[j],m);
                 else computingMatrix[j][m] = computingMatrix[j][m-1] + this->getTime(sol[j],m);
             }
         }
         else {
-            for (int m=0; m < nbMac; m++) {
-                if(m==0) computingMatrix[j][m] = this->getTime(sol[j],m);
+            for (int m=1; m <= nbMac; m++) {
+                if(m==1) computingMatrix[j][m] = computingMatrix[j-1][m] + this->getTime(sol[j],m);
                 else computingMatrix[j][m] = max(computingMatrix[j-1][m], computingMatrix[j][m-1]) + this->getTime(sol[j],m);
             }
         }
     }
-    vector<long int> completionTime = computingMatrix[nbJob-1];
     long int totalTardiness = 0;
-    for (int j=0; j < nbJob; j++) totalTardiness += max(completionTime[j], 0)*this->getPriority(sol[j]);
+    for (int j=1; j <= nbJob; j++) totalTardiness += max(computingMatrix[j][nbMac] - this->getDueDate(sol[j]), (long) 0)*this->getPriority(sol[j]);
     return totalTardiness;
 }
 
 long int PfspInstance::getPriority(int job) {
     return priority[job];
+}
+
+long PfspInstance::getDueDate(int job) {
+    return dueDates[job];
 }
