@@ -6,19 +6,21 @@
 #define HEURISTIC_PROJECT1_PERMUTATIONS_H
 
 #include <vector>
+#include "pfspinstance.h"
 
 using namespace std;
 
 class Permutation{
-private:
-    vector<int> sol, currMod, improvement;
-    bool stop;
-    void (*improvType)(vector<int> improv);
-
 public:
-    Permutation(vector<int> &sol, void (*improvType)(vector<int> improv));
+    vector<int> sol, currMod, improvement;
+    bool (*improvType)(vector<int> improv, PfspInstance instance, long int curr_score);
+    bool stop;
+    long int currentScore;
+    PfspInstance instance;
+    Permutation(vector<int> &sol, PfspInstance instance, bool (*improvType)(vector<int> improv, PfspInstance instance, long int curr_score));
+    Permutation(vector<int> &sol, PfspInstance instance, bool (*improvType)(vector<int> improv, PfspInstance instance, long int curr_score), long int score);
     ~Permutation();
-    void printImprovement();
+    void printVector(vector<int> vec);
     void doPermutation(int i, int j);
     void doInsert(int initial, int final);
     bool evalImprovement();

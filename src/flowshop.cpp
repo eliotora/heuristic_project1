@@ -25,6 +25,11 @@
 #include <ctime>
 #include <string>
 #include "pfspinstance.h"
+#include "permutations.h"
+#include "permutations/transpose.h"
+#include "permutations/exchange.h"
+#include "permutations/insert.h"
+#include "improvement.h"
 
 using namespace std;
 
@@ -106,28 +111,28 @@ void randomPermutation(int nbJobs, vector< int > & sol)
 
 int main(int argc, char **argv)
 {
-  int i;
-  long int WeightedSumCompletionTimes;
+    int i;
+    long int WeightedSumCompletionTimes;
 
 
-  if (argc == 1)
-  {
-    cout << "Usage: ./flowshopWCT <instance_file>" << endl;
-    return 0;
-  }
+    if (argc == 1)
+    {
+        cout << "Usage: ./flowshopWCT <instance_file>" << endl;
+        return 0;
+    }
 
-  /* initialize random seed: */
-  srand ( time(NULL) );
+    /* initialize random seed: */
+    srand ( time(NULL) );
 
-  /* Create instance object */
-  PfspInstance instance;
+    /* Create instance object */
+    PfspInstance instance;
 
-  /* Read data from file */
-  if (! instance.readDataFromFile(argv[1]) )
-    return 1;
-  /* Create a vector of int to represent the solution
-    WARNING: By convention, we store the jobs starting from index 1,
-             thus the size nbJob + 1. */
+    /* Read data from file */
+    if (! instance.readDataFromFile(argv[1]) )
+        return 1;
+    /* Create a vector of int to represent the solution
+       WARNING: By convention, we store the jobs starting from index 1,
+                thus the size nbJob + 1. */
     vector< int > solution ( instance.getNbJob()+ 1 );
     string s = argv[2];
     cout << s << endl;
@@ -142,15 +147,46 @@ int main(int argc, char **argv)
         simpRZsolution(instance.getNbJob(), solution, instance);
     }
 
-  cout << "Random solution: " ;
-  for (i = 1; i <= instance.getNbJob(); ++i)
-    cout << solution[i] << " " ;
-  cout << endl;
+    cout << "Solution: " ;
+    for (i = 1; i <= instance.getNbJob(); ++i)
+        cout << solution[i] << " " ;
+    cout << endl;
+    bool (*foo)(vector<int> sol, PfspInstance instance, long int curr_score) = &firstImprovement;
+    string p = argv[3];
+    if (p == "--tran")
+    {
+        for (int u = 0; u < 10; u++) {
+            Transpose transpose = Transpose(solution, instance, foo);
+            solution = transpose.generateTranspose(solution);
+            if (not transpose.stop) break;
+        }
+    }
+    else if (p == "--exch")
+    {
+        for (int u = 0; u < 10; u++) {
+            Exchange exchange = Exchange(solution, instance, foo);
+            solution = exchange.generateExchange(solution);
+            if (not exchange.stop) break;
+        }
+    }
+    else if (p == "--inse")
+    {
+        for (int u = 0; u < 10; u++) {
+            Insert insert = Insert(solution, instance, foo);
+            solution = insert.generateInsert(solution);
+            if (not insert.stop) break;
+        }
+    }
+    cout << "Solution: " ;
+    for (i = 1; i <= instance.getNbJob(); ++i)
+        cout << solution[i] << " " ;
+    cout << endl;
 
-  /* Compute the WCT of this solution */
-  WeightedSumCompletionTimes = instance.computeWCT(solution);
-  cout << "Total weighted completion time: " << WeightedSumCompletionTimes << endl;
-  cout << "Total weighted tardiness: " << instance.computeWT(solution) << endl;
 
-  return 0;
+    /* Compute the WCT of this solution */
+    WeightedSumCompletionTimes = instance.computeWCT(solution);
+    cout << "Total weighted completion time: " << WeightedSumCompletionTimes << endl;
+    cout << "Total weighted tardiness: " << instance.computeWT(solution) << endl;
+
+    return 0;
 }

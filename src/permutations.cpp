@@ -7,17 +7,30 @@
 #include "permutations.h"
 using namespace std;
 
-Permutation::Permutation(vector<int> &sol, void (*improvType)(vector<int> improv)) {
+Permutation::Permutation(vector<int> &sol, PfspInstance instance, bool (*improvType)(vector<int> improv, PfspInstance instance, long int curr_score)) {
     this->sol = sol;
     this->currMod = sol;
     this->improvement = vector<int>(sol.size());
     this->stop = false;
     this->improvType = improvType;
+    this->instance = instance;
+    this->currentScore = instance.computeWT(this->sol);
 }
+
+Permutation::Permutation(vector<int> &sol, PfspInstance instance, bool (*improvType)(vector<int>, PfspInstance instance, long int curr_score), long score) {
+    this->sol = sol;
+    this->currMod = sol;
+    this->improvement = vector<int>(sol.size());
+    this->stop = false;
+    this->improvType = improvType;
+    this->instance = instance;
+    this->currentScore = score;
+}
+
 Permutation::~Permutation() {}
 
-void Permutation::printImprovement() {
-    for (int item: this->improvement) {
+void Permutation::printVector(vector<int> vec) {
+    for (int item: vec) {
         cout << item << ", ";
     }
     cout << endl;
@@ -35,24 +48,9 @@ void Permutation::doInsert(int initial, int final) {
     if (final > initial) {
         final--;
     }
-    this->currMod.insert(vec.begin() + final, val);
+    this->currMod.insert(this->currMod.begin() + final, val);
 }
 
 bool Permutation::evalImprovement() {
-    return this->improvType(this->currMod);
-}
-
-
-
-
-
-int main() {
-    vector<int> a, b;
-    for (int i=1; i<6; ++i) {
-        a.push_back(i);
-    }
-    b = a;
-    /*doInsert(0,1,b);
-    printVector(b);*/
-    generateInserts(a);
+    return this->improvType(this->currMod, this->instance, this->currentScore);
 }

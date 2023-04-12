@@ -2,11 +2,13 @@
 // Created by eliotora on 5/04/23.
 //
 
-#include <vector>
+#include "improvement.h"
+#include <iostream>
 
-using namespace std;
-
-vector<int> firstImprovement(vector<int> sol, void (*neigh)(vector<int> vec)) {
-    bool improv = false;
-
+bool firstImprovement(vector<int> sol, PfspInstance instance, long int curr_score) {
+    cout << "Solution received: ";
+    for (int job: sol) cout << job << ", ";
+    long int new_score = instance.computeWT(sol);
+    cout << endl << "New score: " << new_score << "; result: " << (bool)(new_score < curr_score) << endl;
+    return new_score < curr_score;
 }
