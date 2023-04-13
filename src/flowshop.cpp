@@ -20,19 +20,18 @@
 
 #include <iostream>
 #include <cstdlib>
-#include <cstdio>
-#include <cstdlib>
 #include <ctime>
 #include <string>
+#include <chrono>
+#include <fstream>
+#include <cstring>
+#include <sys/stat.h>
+#include <filesystem>
 #include "pfspinstance.h"
-#include "permutations.h"
-#include "permutations/transpose.h"
-#include "permutations/exchange.h"
-#include "permutations/insert.h"
-#include "improvement.h"
 #include "flowshopinstance.h"
 
 using namespace std;
+using namespace std::chrono;
 
 int findMax(vector<float> & vec)
 {
@@ -40,7 +39,6 @@ int findMax(vector<float> & vec)
     for (int i = 1; i < vec.size(); i++) if (vec[i] > vec[res]) res = i;
     return res;
 }
-
 
 void simpRZsolution(int nbJobs, vector<int> & sol, PfspInstance instance)
 {
@@ -51,7 +49,7 @@ void simpRZsolution(int nbJobs, vector<int> & sol, PfspInstance instance)
     /* find the weighted sum of process time of each job */
     for (int i = nbJobs; i >= 1; --i)
     {
-        int sumTime = 0;
+        long sumTime = 0;
         /* find the total process time of the job */
         for (int j = nbMac; j>=1; --j) sumTime += instance.getTime(i,j);
 
@@ -71,12 +69,10 @@ void simpRZsolution(int nbJobs, vector<int> & sol, PfspInstance instance)
     }
 }
 
-
 int generateRndPosition(int min, int max)
 {
   return ( rand() % max + min );
 }
-
 
 /* Fill the solution with numbers between 1 and nbJobs, shuffled */
 void randomPermutation(int nbJobs, vector< int > & sol)
@@ -110,68 +106,85 @@ void randomPermutation(int nbJobs, vector< int > & sol)
 
 /***********************************************************************/
 
+void open_file(char **&argv, fstream &file) {
+    char name[30] = "";
+    strcat(name,argv[1]);
+    strcat(name,argv[2]);
+    strcat(name, argv[3]);
+    strcat(name, argv[4]);
+    file.open(name, ios::trunc|ios::out);
+}
+
 int main(int argc, char **argv)
 {
-    int i;
-    long int WeightedSumCompletionTimes;
-
-
-    if (argc < 5)
-    {
-        cout << "Usage: ./flowshopWCT <instance_file> --simp|--rand --exchange|--transpose|--insert --first|--best" << endl;
+    string path = "PFSP_instances";
+    fstream fout;
+    open_file(argv, fout);
+    struct stat sb{};
+    if (argc < 5) {
+        cout
+                << "Usage: ./pfspwt --ii|--vnd --first|--best --exchange|--transpose|--insert --srz|--rand"
+                << endl;
         return 0;
     }
+    for (const auto& entry : filesystem::directory_iterator(path)) {
+        cout << entry << endl;
+        PfspInstance instance;
 
-    /* initialize random seed: */
-    srand ( time(NULL) );
+        /* Read data from file */
+        if (!instance.readDataFromFile(const_cast<char *>(entry.path().string().c_str())))
+            return 1;
+        /* Create a vector of int to represent the solution
+           WARNING: By convention, we store the jobs starting from index 1,
+                    thus the size nbJob + 1. */
+        for (int ite = 0; ite < 5; ite++) {
+            auto start = high_resolution_clock::now();
+            int i;
+            long int WeightedSumCompletionTimes;
+            /* initialize random seed: */
+            srand(time(NULL));
 
-    /* Create instance object */
-    PfspInstance instance;
 
-    /* Read data from file */
-    if (! instance.readDataFromFile(argv[1]) )
-        return 1;
-    /* Create a vector of int to represent the solution
-       WARNING: By convention, we store the jobs starting from index 1,
-                thus the size nbJob + 1. */
-    vector< int > solution ( instance.getNbJob()+ 1 );
-    string s = argv[2];
-    cout << s << endl;
-    if (s == "--rand")
-    {
-        cout << "Random" << endl;
-        /* Fill the vector with a random permutation */
-        randomPermutation(instance.getNbJob(), solution);
+
+
+            /* Create instance object */
+            vector<int> solution(instance.getNbJob() + 1);
+            string s = argv[4];
+            if (s == "--rand") {
+                /* Fill the vector with a random permutation */
+                randomPermutation(instance.getNbJob(), solution);
+            } else if (s == "--srz") {
+                simpRZsolution(instance.getNbJob(), solution, instance);
+            }
+
+            vector<string> parameters(2);
+            parameters[0] = argv[3];
+            parameters[1] = argv[2];
+
+            /*cout << "Starting solution: ";
+            for (i = 1; i <= instance.getNbJob(); ++i)
+                cout << solution[i] << " ";
+            cout << endl;*/
+
+            FlowshopInstance flowshopInstance = FlowshopInstance(solution, instance, parameters);
+            flowshopInstance.run();
+
+            solution = flowshopInstance.getCurrentSolution();
+
+            /*cout << "Solution: ";
+            for (i = 1; i <= instance.getNbJob(); ++i)
+                cout << solution[i] << " ";
+            cout << endl;*/
+
+            auto stop = high_resolution_clock::now();
+            auto duration = duration_cast<microseconds>(stop - start);
+            /* Compute the WCT of this solution */
+            /*WeightedSumCompletionTimes = instance.computeWCT(solution);
+            cout << "Total weighted completion time: " << WeightedSumCompletionTimes << endl;*/
+            /*cout << "Total weighted tardiness: " << flowshopInstance.getCurrentScore() << endl;
+            cout << "Total run time: " << duration.count() << " microseconds" << endl;*/
+            fout << entry << ", " << flowshopInstance.getCurrentScore() << ", " << duration.count() << "\n";
+        }
     }
-    else if (s == "--simp")
-    {
-        simpRZsolution(instance.getNbJob(), solution, instance);
-    }
-
-    vector<string> parameters(2);
-    parameters[0] = argv[3];
-    parameters[1] = argv[4];
-
-    solution = {0,12,20,17,9,37,34,42,11,39,3,30,48,29,27,7,15,33,40,21,6,16,35,19,26,45,10,5,2,25,41,43,47,8,24,14,44,13,18,23,49,28,31,50,36,38,1,32,22,46,4};
-    cout << "Starting solution: " ;
-    for (i = 1; i <= instance.getNbJob(); ++i)
-        cout << solution[i] << " " ;
-    cout << endl;
-
-    FlowshopInstance flowshopInstance = FlowshopInstance(solution, instance, parameters);
-    flowshopInstance.run();
-
-    solution = flowshopInstance.getCurrentSolution();
-    cout << "Solution: " ;
-    for (i = 1; i <= instance.getNbJob(); ++i)
-        cout << solution[i] << " " ;
-    cout << endl;
-
-
-    /* Compute the WCT of this solution */
-    WeightedSumCompletionTimes = instance.computeWCT(solution);
-    cout << "Total weighted completion time: " << WeightedSumCompletionTimes << endl;
-    cout << "Total weighted tardiness: " << instance.computeWT(solution) << endl;
-
     return 0;
 }

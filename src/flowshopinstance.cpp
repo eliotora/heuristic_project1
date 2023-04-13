@@ -5,7 +5,7 @@
 #include "flowshopinstance.h"
 
 FlowshopInstance::FlowshopInstance(vector<int> &sol, PfspInstance pfspInstance, vector<string> parameters) {
-    cout << "Creating Instance" << endl;
+    /*cout << "Creating Instance" << endl;*/
     starting_solution = sol;
     current_solution = sol;
     improvement = sol;
@@ -19,7 +19,7 @@ FlowshopInstance::FlowshopInstance(vector<int> &sol, PfspInstance pfspInstance, 
     else if (parameters[0] == "--transpose") permutation_func = &FlowshopInstance::transpose;
     if (parameters[1] == "--first") improvement_func = &FlowshopInstance::first_improvement;
     else if (parameters[1] == "--best") improvement_func = &FlowshopInstance::best_improvement;
-    cout << "Instance created, initial score: " << inital_score << endl;
+    /*cout << "Instance created, initial score: " << inital_score << endl;*/
 }
 
 FlowshopInstance::~FlowshopInstance() {}
@@ -28,8 +28,8 @@ void FlowshopInstance::run() {
     improvement_flag = true;
     int i = 1;
     while (improvement_flag) {
-        cout << "-------------------------------------------------------------" << endl;
-        cout << "Iteration: " << i++ << endl;
+        /*cout << "-------------------------------------------------------------" << endl;
+        cout << "Iteration: " << i++ << endl;*/
         improve();
     }
 }
@@ -40,7 +40,6 @@ void FlowshopInstance::improve() {
     if (improvement_flag) {
         current_solution = improvement;
         current_score = best_improvement_score;
-        printVector(current_solution);
     }
 }
 
@@ -101,26 +100,24 @@ void FlowshopInstance::transpose() {
 
 void FlowshopInstance::first_improvement() {
     long new_score = instance.computeWT(working_solution);
-    cout << "Evaluating improvement: " << new_score << " vs. " << current_score << " for: " << endl;
-    printVector(working_solution);
     if (new_score < current_score){
+        /*cout << "Evaluating improvement: " << new_score << " vs. " << current_score << " for: " << endl;
+        printVector(working_solution);*/
         best_improvement_score = new_score;
         improvement = working_solution;
         stop_flag = true;
         improvement_flag = true;
-        cout << "Found Improvement: " << improvement_flag << endl;
     }
 }
 
 void FlowshopInstance::best_improvement() {
     long new_score = instance.computeWT(working_solution);
     if (new_score < best_improvement_score) {
-        cout << "Evaluating improvement: " << new_score << " vs. " << current_score << " for: " << endl;
-        printVector(working_solution);
+        /*cout << "Evaluating improvement: " << new_score << " vs. " << current_score << " for: " << endl;
+        printVector(working_solution);*/
         best_improvement_score = new_score;
         improvement = working_solution;
         improvement_flag = true;
-        cout << "Found Improvement: " << improvement_flag << endl;
     }
 }
 
