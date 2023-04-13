@@ -125,7 +125,7 @@ int main(int argc, char **argv)
         cout
                 << "Usage: ./pfspwt --ii --first|--best --exchange|--transpose|--insert --srz|--rand"
                 << endl
-                << "or ./pfspwt --vdn --first|--best --tei|tie --srz|--rand"
+                << "or ./pfspwt --vnd --first|--best --tei|tie --srz|--rand"
                 << endl;
         return 0;
     }

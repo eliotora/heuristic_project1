@@ -19,7 +19,7 @@ FlowshopInstance::FlowshopInstance(vector<int> &sol, PfspInstance pfspInstance, 
         else if (parameters[1] == "--insert") permutation_functions.push_back(&FlowshopInstance::insert);
         else if (parameters[1] == "--transpose") permutation_functions.push_back(&FlowshopInstance::transpose);
     }
-    if (parameters[0] == "--vdn") {
+    if (parameters[0] == "--vnd") {
         permutation_functions.push_back(&FlowshopInstance::transpose);
         if (parameters[1] == "--tei") {
             permutation_functions.push_back(&FlowshopInstance::exchange);
