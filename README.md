@@ -48,6 +48,12 @@ Again each algorithm has to run 5 times on the 20 instances of the PFSP, to run 
 And again resulting data is registered in a file corresponding to each run.
 Data in each file won't be ordered by default but a set of result files is already given in the directory "VNDResults"
 
+The command:
+```bash
+  ./ex1.2extended 
+```
+Will run the 8 possible VND algorithms.
+
 ### Independent run
 The program can also be run independently for each algorithm. To do that run:
 
