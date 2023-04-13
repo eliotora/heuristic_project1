@@ -123,7 +123,9 @@ int main(int argc, char **argv)
     struct stat sb{};
     if (argc < 5) {
         cout
-                << "Usage: ./pfspwt --ii|--vnd --first|--best --exchange|--transpose|--insert --srz|--rand"
+                << "Usage: ./pfspwt --ii --first|--best --exchange|--transpose|--insert --srz|--rand"
+                << endl
+                << "or ./pfspwt --vdn --first|--best --tei|tie --srz|--rand"
                 << endl;
         return 0;
     }
@@ -157,9 +159,10 @@ int main(int argc, char **argv)
                 simpRZsolution(instance.getNbJob(), solution, instance);
             }
 
-            vector<string> parameters(2);
-            parameters[0] = argv[3];
-            parameters[1] = argv[2];
+            vector<string> parameters(3);
+            parameters[0] = argv[1];
+            parameters[1] = argv[3];
+            parameters[2] = argv[2];
 
             /*cout << "Starting solution: ";
             for (i = 1; i <= instance.getNbJob(); ++i)

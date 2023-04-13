@@ -21,6 +21,7 @@ private:
     PfspInstance instance;
     bool stop_flag, improvement_flag;
     void (FlowshopInstance::*improvement_func)();
+    vector<void (FlowshopInstance::*)()> permutation_functions;
     void (FlowshopInstance::*permutation_func)();
     void exchange();
     void insert();

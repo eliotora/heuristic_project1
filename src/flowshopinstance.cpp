@@ -5,7 +5,7 @@
 #include "flowshopinstance.h"
 
 FlowshopInstance::FlowshopInstance(vector<int> &sol, PfspInstance pfspInstance, vector<string> parameters) {
-    /*cout << "Creating Instance" << endl;*/
+    //cout << "Creating Instance" << endl;
     starting_solution = sol;
     current_solution = sol;
     improvement = sol;
@@ -14,12 +14,25 @@ FlowshopInstance::FlowshopInstance(vector<int> &sol, PfspInstance pfspInstance, 
     inital_score = instance.computeWT(starting_solution);
     current_score = inital_score;
     best_improvement_score = inital_score;
-    if (parameters[0] == "--exchange") permutation_func = &FlowshopInstance::exchange;
-    else if (parameters[0] == "--insert") permutation_func = &FlowshopInstance::insert;
-    else if (parameters[0] == "--transpose") permutation_func = &FlowshopInstance::transpose;
-    if (parameters[1] == "--first") improvement_func = &FlowshopInstance::first_improvement;
-    else if (parameters[1] == "--best") improvement_func = &FlowshopInstance::best_improvement;
-    /*cout << "Instance created, initial score: " << inital_score << endl;*/
+    if (parameters[0] == "--ii") {
+        if (parameters[1] == "--exchange") permutation_functions.push_back(&FlowshopInstance::exchange);
+        else if (parameters[1] == "--insert") permutation_functions.push_back(&FlowshopInstance::insert);
+        else if (parameters[1] == "--transpose") permutation_functions.push_back(&FlowshopInstance::transpose);
+    }
+    if (parameters[0] == "--vdn") {
+        permutation_functions.push_back(&FlowshopInstance::transpose);
+        if (parameters[1] == "--tei") {
+            permutation_functions.push_back(&FlowshopInstance::exchange);
+            permutation_functions.push_back(&FlowshopInstance::insert);
+        }
+        else if (parameters[1] == "--tie") {
+            permutation_functions.push_back(&FlowshopInstance::insert);
+            permutation_functions.push_back(&FlowshopInstance::exchange);
+        }
+    }
+    if (parameters[2] == "--first") improvement_func = &FlowshopInstance::first_improvement;
+    else if (parameters[2] == "--best") improvement_func = &FlowshopInstance::best_improvement;
+    //cout << "Instance created, initial score: " << inital_score << endl;
 }
 
 FlowshopInstance::~FlowshopInstance() {}
@@ -27,6 +40,7 @@ FlowshopInstance::~FlowshopInstance() {}
 void FlowshopInstance::run() {
     improvement_flag = true;
     int i = 1;
+    //cout << "Started run" << endl;
     while (improvement_flag) {
         /*cout << "-------------------------------------------------------------" << endl;
         cout << "Iteration: " << i++ << endl;*/
@@ -36,7 +50,14 @@ void FlowshopInstance::run() {
 
 void FlowshopInstance::improve() {
     improvement_flag = false;
-    (this->*permutation_func)();
+    //cout << "Number of neighbourhoods: " << permutation_functions.size() << endl;
+    for (auto permutation_f: permutation_functions) {
+        stop_flag = false;
+        //cout << "tei" << endl;
+        (this->*permutation_f)();
+        if (stop_flag) break;
+    }
+    //(this->*permutation_func)();
     if (improvement_flag) {
         current_solution = improvement;
         current_score = best_improvement_score;

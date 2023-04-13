@@ -1,0 +1,162 @@
+--ii--best--exchange--rand
+50
+average percentage deviation from best-known solutions
+-17.73026
+total computation time across all instances of the same size
+11008304
+100
+average percentage deviation from best-known solutions
+-13.59821
+total computation time across all instances of the same size
+154380699
+
+--ii--best--exchange--srz
+50
+average percentage deviation from best-known solutions
+-28.05107
+total computation time across all instances of the same size
+9775961
+100
+average percentage deviation from best-known solutions
+-16.26081
+total computation time across all instances of the same size
+96191441
+
+wilcox.test (rand.cost, srz.cost, paired=T)$p.value
+1.101633e-10
+
+--ii--best--insert--rand
+50
+average percentage deviation from best-known solutions
+-38.51793
+total computation time across all instances of the same size
+22356598
+100
+average percentage deviation from best-known solutions
+-17.83854
+total computation time across all instances of the same size
+357268943
+
+--ii--best--insert--srz
+50
+average percentage deviation from best-known solutions
+-36.7368
+total computation time across all instances of the same size
+18342373
+100
+average percentage deviation from best-known solutions
+-20.17837
+total computation time across all instances of the same size
+219534793
+
+wilcox.test (rand.cost, srz.cost, paired=T)$p.value
+0.09037721
+
+--ii--best--transpose--rand
+50
+average percentage deviation from best-known solutions
+265.9823
+total computation time across all instances of the same size
+369514
+100
+average percentage deviation from best-known solutions
+88.53941
+total computation time across all instances of the same size
+2692855
+
+--ii--best--transpose--srz
+50
+average percentage deviation from best-known solutions
+112.8844
+total computation time across all instances of the same size
+278158
+100
+average percentage deviation from best-known solutions
+7.595189
+total computation time across all instances of the same size
+2539109
+
+wilcox.test (rand.cost, srz.cost, paired=T)$p.value
+3.875279e-18
+
+--ii--first--exchange--rand
+50
+average percentage deviation from best-known solutions
+-28.56515
+total computation time across all instances of the same size
+28135876
+100
+average percentage deviation from best-known solutions
+-21.34131
+total computation time across all instances of the same size
+642498710
+
+--ii--first--exchange--srz
+50
+average percentage deviation from best-known solutions
+-39.16041
+total computation time across all instances of the same size
+22140422
+100
+average percentage deviation from best-known solutions
+-21.5701
+total computation time across all instances of the same size
+188945397
+
+wilcox.test (rand.cost, srz.cost, paired=T)$p.value
+5.90711e-07
+
+--ii--first--insert--rand
+50
+average percentage deviation from best-known solutions
+-43.98009
+total computation time across all instances of the same size
+81738053
+100
+average percentage deviation from best-known solutions
+-23.90532
+total computation time across all instances of the same size
+1608232990
+
+--ii--first--insert--srz
+50
+average percentage deviation from best-known solutions
+-44.21998
+total computation time across all instances of the same size
+57789692
+100
+average percentage deviation from best-known solutions
+-24.2635
+total computation time across all instances of the same size
+445437988
+
+wilcox.test (rand.cost, srz.cost, paired=T)$p.value
+0.2719667
+
+--ii--first--transpose--rand
+50
+average percentage deviation from best-known solutions
+267.7763
+total computation time across all instances of the same size
+301255
+100
+average percentage deviation from best-known solutions
+81.77459
+total computation time across all instances of the same size
+2426347
+
+--ii--first--transpose--srz
+50
+average percentage deviation from best-known solutions
+108.8332
+total computation time across all instances of the same size
+209908
+100
+average percentage deviation from best-known solutions
+6.982259
+total computation time across all instances of the same size
+1856134
+
+wilcox.test (rand.cost, srz.cost, paired=T)$p.value
+3.871999e-18
+
