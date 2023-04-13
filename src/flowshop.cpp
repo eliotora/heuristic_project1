@@ -40,6 +40,7 @@ int findMax(vector<float> & vec)
     return res;
 }
 
+/* Generate the simplified RZ heuristic starting solution */
 void simpRZsolution(int nbJobs, vector<int> & sol, PfspInstance instance)
 {
     // Phase 1: Order by Di
@@ -104,8 +105,7 @@ void randomPermutation(int nbJobs, vector< int > & sol)
   }
 }
 
-/***********************************************************************/
-
+/* Create an output file for the iteration */
 void open_file(char **&argv, fstream &file) {
     char name[30] = "";
     strcat(name,argv[1]);
@@ -115,12 +115,15 @@ void open_file(char **&argv, fstream &file) {
     file.open(name, ios::trunc|ios::out);
 }
 
+/***********************************************************************/
+
 int main(int argc, char **argv)
 {
+    // Prepare the output file
     string path = "PFSP_instances";
     fstream fout;
     open_file(argv, fout);
-    struct stat sb{};
+
     if (argc < 5) {
         cout
                 << "Usage: ./pfspwt --ii --first|--best --exchange|--transpose|--insert --srz|--rand"
@@ -129,63 +132,67 @@ int main(int argc, char **argv)
                 << endl;
         return 0;
     }
+
+    // Start to iterate the run on each instance file
     for (const auto& entry : filesystem::directory_iterator(path)) {
         cout << entry << endl;
+        /* Create instance object */
         PfspInstance instance;
 
         /* Read data from file */
-        if (!instance.readDataFromFile(const_cast<char *>(entry.path().string().c_str())))
+        if (!instance.readDataFromFile(const_cast<char *>(entry.path().string().c_str()))) {
             return 1;
-        /* Create a vector of int to represent the solution
-           WARNING: By convention, we store the jobs starting from index 1,
-                    thus the size nbJob + 1. */
+        }
+
+        // Loop 5 times through the full run
         for (int ite = 0; ite < 5; ite++) {
+
+            /* Start the clock */
             auto start = high_resolution_clock::now();
-            int i;
-            long int WeightedSumCompletionTimes;
+
             /* initialize random seed: */
             srand(time(NULL));
 
 
 
 
-            /* Create instance object */
+            /* Create a vector of int to represent the solution
+               WARNING: By convention, we store the jobs starting from index 1,
+                        thus the size nbJob + 1. */
             vector<int> solution(instance.getNbJob() + 1);
+
             string s = argv[4];
             if (s == "--rand") {
                 /* Fill the vector with a random permutation */
                 randomPermutation(instance.getNbJob(), solution);
             } else if (s == "--srz") {
+                /* Fill the vector with the simplified RZ heuristic solution */
                 simpRZsolution(instance.getNbJob(), solution, instance);
             }
 
+            /* Prepare the input for the instance */
             vector<string> parameters(3);
             parameters[0] = argv[1];
             parameters[1] = argv[3];
             parameters[2] = argv[2];
 
-            /*cout << "Starting solution: ";
-            for (i = 1; i <= instance.getNbJob(); ++i)
-                cout << solution[i] << " ";
-            cout << endl;*/
-
+            /* Create instance object */
             FlowshopInstance flowshopInstance = FlowshopInstance(solution, instance, parameters);
+
+            /* Start the run */
             flowshopInstance.run();
 
             solution = flowshopInstance.getCurrentSolution();
 
-            /*cout << "Solution: ";
-            for (i = 1; i <= instance.getNbJob(); ++i)
-                cout << solution[i] << " ";
-            cout << endl;*/
-
+            /* Stop the clock and get the duration of the run */
             auto stop = high_resolution_clock::now();
             auto duration = duration_cast<microseconds>(stop - start);
-            /* Compute the WCT of this solution */
-            /*WeightedSumCompletionTimes = instance.computeWCT(solution);
-            cout << "Total weighted completion time: " << WeightedSumCompletionTimes << endl;*/
+
+            /* Compute the WT of this solution */
             /*cout << "Total weighted tardiness: " << flowshopInstance.getCurrentScore() << endl;
             cout << "Total run time: " << duration.count() << " microseconds" << endl;*/
+
+            // Output result in the file
             fout << entry << ", " << flowshopInstance.getCurrentScore() << ", " << duration.count() << "\n";
         }
     }

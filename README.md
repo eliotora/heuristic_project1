@@ -92,3 +92,4 @@ Will run the variable neighbourhood algorithm with the first-improvement pivotin
 transpose -> exchange -> insert, and the starting solution will be the simplified RZ heuristic one.
 
 Running any algorithm this way will run it 5 times on each of the 20 instances and give an unordered output data file in the main directory.
+Resulting file name is a concatenation of the parameter, last example will create a file named "--vnd--first--tei--srz"

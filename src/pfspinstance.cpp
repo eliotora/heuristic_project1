@@ -205,22 +205,24 @@ long int PfspInstance::computeWCT(vector< int > & sol)
 }
 
 long int PfspInstance::computeWT(vector<int> &sol) {
+    // Initialise the matrix to compute th weighted tardiness
     vector < vector < long int > > computingMatrix(nbJob+1);
     for (int j=1; j <= nbJob; j++) {
         computingMatrix[j] = vector<long int>(nbMac+1);
-        if (j==1) {
+        if (j==1) { // First column
             for (int m=1; m <= nbMac; m++) {
                 if (m==1) computingMatrix[j][m] = this->getTime(sol[j],m);
                 else computingMatrix[j][m] = computingMatrix[j][m-1] + this->getTime(sol[j],m);
             }
         }
-        else {
+        else { // Other columns
             for (int m=1; m <= nbMac; m++) {
                 if(m==1) computingMatrix[j][m] = computingMatrix[j-1][m] + this->getTime(sol[j],m);
                 else computingMatrix[j][m] = max(computingMatrix[j-1][m], computingMatrix[j][m-1]) + this->getTime(sol[j],m);
             }
         }
     }
+    // Finally compute the total tardiness
     long int totalTardiness = 0;
     for (int j=1; j <= nbJob; j++) totalTardiness += max(computingMatrix[j][nbMac] - this->getDueDate(sol[j]), (long) 0)*this->getPriority(sol[j]);
     return totalTardiness;
