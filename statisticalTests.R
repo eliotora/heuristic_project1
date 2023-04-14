@@ -1,5 +1,5 @@
-rand.file <- "~/CLionProjects/heuristic_project1/IterativeImprovementResults/--ii--first--insert--rand"
-srz.file <- "~/CLionProjects/heuristic_project1/IterativeImprovementResults/--ii--first--insert--srz"
+rand.file <- "~/CLionProjects/heuristic_project1/IterativeImprovementResults/--ii--first--transpose--rand"
+srz.file <- "~/CLionProjects/heuristic_project1/IterativeImprovementResults/--ii--first--transpose--srz"
 
 best.known <- rep(read.csv("~/CLionProjects/heuristic_project1/Best-known Values")$BestKnown, each=5)
 rand <- read.csv(rand.file)
@@ -34,5 +34,3 @@ rand.time50avg
 srz.time50avg
 rand.time100avg
 srz.time100avg
-
-wilcox.test (rand.cost, srz.cost, paired=T)$p.value

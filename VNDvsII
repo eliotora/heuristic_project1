@@ -1,0 +1,23 @@
+tei vs first-exchange-srz
+50: 4.90854
+100: 0.9500604
+
+tei vs first-insert-srz
+50: -0.1510247
+100: -1.743336
+
+tei vs first-transpose-srz
+50: 152.9022
+100: 29.50242
+
+tie vs first-exchange-srz
+50: 2.438824
+100: 1.080201
+
+tie vs first-insert-srz
+50: -2.62074
+100: -1.613196
+
+tie vs first-transpose-srz
+50: 150.4325
+100: 29.63256
