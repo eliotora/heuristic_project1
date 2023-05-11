@@ -52,6 +52,9 @@ public:
     void improve();
     /* Run calls Improve until no more progress is made i.e. we have converged */
     void run();
+    /* Perturbation */
+    void perturbation(int nbrPerturbation);
+
     vector<int> getCurrentSolution();
     long getCurrentScore();
 };

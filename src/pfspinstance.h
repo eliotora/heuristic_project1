@@ -62,6 +62,9 @@ class PfspInstance{
 
     long int computeWCT (vector< int > & sol);
     long int computeWT (vector< int > & sol);
+
+    /* Returns the total processing time needed */
+    long getTotalJobTime();
 };
 
 #endif

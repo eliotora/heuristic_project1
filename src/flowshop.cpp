@@ -27,8 +27,10 @@
 #include <cstring>
 #include <sys/stat.h>
 #include <filesystem>
+#include <algorithm>
 #include "pfspinstance.h"
 #include "flowshopinstance.h"
+#include "ILS.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -115,6 +117,7 @@ void open_file(char **&argv, fstream &file) {
     file.open(name, ios::trunc|ios::out);
 }
 
+
 /***********************************************************************/
 
 int main(int argc, char **argv)
@@ -123,6 +126,12 @@ int main(int argc, char **argv)
     string path = "PFSP_instances";
     fstream fout;
     open_file(argv, fout);
+
+    vector<string> names = vector<string>();
+    for (const auto& entry : filesystem::directory_iterator(path)) {
+        names.emplace_back(entry.path().string().c_str());
+    }
+    sort(names.begin(), names.end());
 
     if (argc < 5) {
         cout
@@ -134,13 +143,17 @@ int main(int argc, char **argv)
     }
 
     // Start to iterate the run on each instance file
-    for (const auto& entry : filesystem::directory_iterator(path)) {
+    for (basic_string<char> entry : names) {
         cout << entry << endl;
         /* Create instance object */
         PfspInstance instance;
 
         /* Read data from file */
-        if (!instance.readDataFromFile(const_cast<char *>(entry.path().string().c_str()))) {
+        /*if (!instance.readDataFromFile(const_cast<char *>(entry.path().string().c_str()))) {
+            return 1;
+        }*/
+
+        if (!instance.readDataFromFile(const_cast<char *>(entry.c_str()))) {
             return 1;
         }
 
@@ -176,24 +189,37 @@ int main(int argc, char **argv)
             parameters[1] = argv[3];
             parameters[2] = argv[2];
 
-            /* Create instance object */
-            FlowshopInstance flowshopInstance = FlowshopInstance(solution, instance, parameters);
+            long score = 0;
 
-            /* Start the run */
-            flowshopInstance.run();
+            if (parameters[0] == "--ils") {
+                parameters[0] = "--vnd";
+                ILS ils_instance = ILS(solution, instance, parameters, 1e8);
+                ils_instance.run();
 
-            solution = flowshopInstance.getCurrentSolution();
+                solution = ils_instance.getCurrentSolution();
+                score = ils_instance.getCurrentScore();
+            } else {
+                /* Create instance object */
+                FlowshopInstance flowshopInstance = FlowshopInstance(solution, instance, parameters);
+
+                /* Start the run */
+                flowshopInstance.run();
+                solution = flowshopInstance.getCurrentSolution();
+                score = flowshopInstance.getCurrentScore();
+            }
+
+
 
             /* Stop the clock and get the duration of the run */
             auto stop = high_resolution_clock::now();
             auto duration = duration_cast<microseconds>(stop - start);
 
             /* Compute the WT of this solution */
-            /*cout << "Total weighted tardiness: " << flowshopInstance.getCurrentScore() << endl;
+            /*cout << "Total weighted tardiness: " << score << endl;
             cout << "Total run time: " << duration.count() << " microseconds" << endl;*/
 
             // Output result in the file
-            fout << entry << ", " << flowshopInstance.getCurrentScore() << ", " << duration.count() << "\n";
+            fout << entry << ", " << score << ", " << duration.count() << "\n";
         }
     }
     return 0;

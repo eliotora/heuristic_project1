@@ -162,3 +162,15 @@ vector<int> FlowshopInstance::getCurrentSolution() {
 long FlowshopInstance::getCurrentScore() {
     return current_score;
 }
+
+
+/* ILS part:
+ * Perturbation implementation via multiple random insertions */
+void FlowshopInstance::perturbation(int nbrPerturbation) {
+    for (int _ = 0; _ < 2; _++) {
+        int i = rand() % starting_solution.size();
+        int j = rand() % starting_solution.size();
+        while (j==i) j = rand() % starting_solution.size();
+        doInsert(i, j, current_solution);
+    }
+}

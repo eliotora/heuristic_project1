@@ -235,3 +235,13 @@ long int PfspInstance::getPriority(int job) {
 long PfspInstance::getDueDate(int job) {
     return dueDates[job];
 }
+
+long PfspInstance::getTotalJobTime() {
+    long res = 0;
+    for (int m = 1; m <= nbMac; m++) {
+        for (int n = 1; n <= nbJob; n++) {
+            res += processingTimesMatrix[n][m];
+        }
+    }
+    return res;
+}
