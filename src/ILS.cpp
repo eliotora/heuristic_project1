@@ -27,7 +27,8 @@ void ILS::run() {
         working_instance.perturbation(gamma);
         working_instance.run();
         acceptance_criterion();
-    } while ((std::chrono::high_resolution_clock::now() - begin).count() < maxTime);
+        //cout << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - begin).count() << endl;
+    } while (std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - begin).count() < maxTime);
 }
 
 // Simulated annealing acceptance criterion (ref PanRuiz2012)

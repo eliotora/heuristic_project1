@@ -12,8 +12,8 @@ class ILS {
 private:
     FlowshopInstance working_instance;
     /* Parameters */
-    int gamma = 4; // TODO:perturbation_nbr to adjust; (set to 2 see (ref PanRuiz2012))
-    float lambda = 4.0; // TODO:temperature parameter to ajdust; (set to 4.0 see (ref PanRuiz2012))
+    int gamma = 2; // perturbation_nbr to adjust; (set to 2 see (ref PanRuiz2012))
+    float lambda = 4.0; // temperature parameter to ajdust; (set to 4.0 see (ref PanRuiz2012))
     float temp;
     long maxTime; // In microsec
 

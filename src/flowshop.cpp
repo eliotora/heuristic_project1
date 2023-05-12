@@ -117,6 +117,14 @@ void open_file(char **&argv, fstream &file) {
     file.open(name, ios::trunc|ios::out);
 }
 
+vector<string> readDirectory(string path) {
+    vector<string> names = vector<string>();
+    for (const auto& entry : filesystem::directory_iterator(path)) {
+        names.emplace_back(entry.path().string().c_str());
+    }
+    sort(names.begin(), names.end());
+    return names;
+}
 
 /***********************************************************************/
 
@@ -127,11 +135,7 @@ int main(int argc, char **argv)
     fstream fout;
     open_file(argv, fout);
 
-    vector<string> names = vector<string>();
-    for (const auto& entry : filesystem::directory_iterator(path)) {
-        names.emplace_back(entry.path().string().c_str());
-    }
-    sort(names.begin(), names.end());
+    vector<string> instances = readDirectory(path);
 
     if (argc < 5) {
         cout
@@ -143,15 +147,10 @@ int main(int argc, char **argv)
     }
 
     // Start to iterate the run on each instance file
-    for (basic_string<char> entry : names) {
+    for (const basic_string<char>& entry : instances) {
         cout << entry << endl;
         /* Create instance object */
         PfspInstance instance;
-
-        /* Read data from file */
-        /*if (!instance.readDataFromFile(const_cast<char *>(entry.path().string().c_str()))) {
-            return 1;
-        }*/
 
         if (!instance.readDataFromFile(const_cast<char *>(entry.c_str()))) {
             return 1;
@@ -193,7 +192,7 @@ int main(int argc, char **argv)
 
             if (parameters[0] == "--ils") {
                 parameters[0] = "--vnd";
-                ILS ils_instance = ILS(solution, instance, parameters, 1e8);
+                ILS ils_instance = ILS(solution, instance, parameters, 1e0);
                 ils_instance.run();
 
                 solution = ils_instance.getCurrentSolution();
