@@ -126,25 +126,51 @@ vector<string> readDirectory(string path) {
     return names;
 }
 
+vector<string> parseArg(int argc, char **argv) {
+    vector<string> parameter = vector<string>();
+    bool all_good = true;
+    if (argc < 2) all_good = false;
+    else parameter.emplace_back((string)argv[1]);
+    if (all_good and argc == 5 and (string)argv[1] == "--ii") {
+        cout << "ii" << endl;
+        if ((string)argv[2] == "--first" or (string)argv[2] == "--best") parameter.emplace_back((string)argv[2]);
+        if ((string)argv[3] == "--exchange" or (string)argv[3] == "--transpose" or (string)argv[3] == "--insert") parameter.emplace_back((string)argv[3]);
+        if ((string)argv[4] == "--srz" or (string)argv[4] == "--rand") parameter.emplace_back((string)argv[4]);
+        if (parameter.size() != 4) all_good = false;
+    } else if (all_good and argc == 3 and (string)argv[1] == "--vnd") {
+        cout << "vnd" << endl;
+        parameter.emplace_back("--first");
+        if ((string)argv[2] == "--tie" or (string)argv[2] == "--tei" or argv[3]) parameter.emplace_back((string)argv[3]);
+        parameter.emplace_back("--srz");
+        if (parameter.size() != 4) all_good = false;
+    } else if (all_good and argc == 2 and (string)argv[1] == "--ils") {
+        cout << "ils" << endl;
+        parameter.emplace_back("--first");
+        parameter.emplace_back("--tie");
+        parameter.emplace_back("--srz");
+    } else all_good = false;
+
+    if (!all_good) {
+        cout
+        << "Usage: ./pfspwt --ii --first|--best --exchange|--transpose|--insert --srz|--rand" << endl
+        << "or ./pfspwt --vnd --tei|tie" << endl
+        << "or ./pfspwt --ils" << endl;
+        std::exit(1);
+    }
+    return parameter;
+}
+
 /***********************************************************************/
 
 int main(int argc, char **argv)
 {
+    vector<string> parameters = parseArg(argc, argv);
     // Prepare the output file
     string path = "PFSP_instances";
     fstream fout;
     open_file(argv, fout);
 
     vector<string> instances = readDirectory(path);
-
-    if (argc < 5) {
-        cout
-                << "Usage: ./pfspwt --ii --first|--best --exchange|--transpose|--insert --srz|--rand"
-                << endl
-                << "or ./pfspwt --vnd --first|--best --tei|tie --srz|--rand"
-                << endl;
-        return 0;
-    }
 
     // Start to iterate the run on each instance file
     for (const basic_string<char>& entry : instances) {
@@ -173,23 +199,16 @@ int main(int argc, char **argv)
                         thus the size nbJob + 1. */
             vector<int> solution(instance.getNbJob() + 1);
 
-            string s = argv[4];
-            if (s == "--rand") {
+            /* Prepare the input for the instance */
+
+            long score = 0;
+            if (parameters[0] == "--rand") {
                 /* Fill the vector with a random permutation */
                 randomPermutation(instance.getNbJob(), solution);
-            } else if (s == "--srz") {
+            } else if (parameters[0] == "--srz") {
                 /* Fill the vector with the simplified RZ heuristic solution */
                 simpRZsolution(instance.getNbJob(), solution, instance);
             }
-
-            /* Prepare the input for the instance */
-            vector<string> parameters(3);
-            parameters[0] = argv[1];
-            parameters[1] = argv[3];
-            parameters[2] = argv[2];
-
-            long score = 0;
-
             if (parameters[0] == "--ils") {
                 parameters[0] = "--vnd";
                 ILS ils_instance = ILS(solution, instance, parameters, 1e0);
@@ -206,8 +225,6 @@ int main(int argc, char **argv)
                 solution = flowshopInstance.getCurrentSolution();
                 score = flowshopInstance.getCurrentScore();
             }
-
-
 
             /* Stop the clock and get the duration of the run */
             auto stop = high_resolution_clock::now();
