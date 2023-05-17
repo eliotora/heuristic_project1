@@ -31,6 +31,7 @@
 #include "pfspinstance.h"
 #include "flowshopinstance.h"
 #include "ILS.h"
+#include "MA.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -78,42 +79,43 @@ int generateRndPosition(int min, int max)
 }
 
 /* Fill the solution with numbers between 1 and nbJobs, shuffled */
-void randomPermutation(int nbJobs, vector< int > & sol)
+vector<int> randomPermutation(int nbJobs)
 {
-  vector<bool> alreadyTaken(nbJobs+1, false); // nbJobs elements with value false
-  vector<int > choosenNumber(nbJobs+1, 0);
+    vector<int> sol(nbJobs+1);
+    vector<bool> alreadyTaken(nbJobs+1, false); // nbJobs elements with value false
+    vector<int > choosenNumber(nbJobs+1, 0);
 
-  int nbj;
-  int rnd, i, j, nbFalse;
+    int nbj;
+    int rnd, i, j, nbFalse;
 
-  nbj = 0;
-  for (i = nbJobs; i >= 1; --i)
-  {
-    rnd = generateRndPosition(1, i);
-    nbFalse = 0;
+    nbj = 0;
+    for (i = nbJobs; i >= 1; --i)
+    {
+        rnd = generateRndPosition(1, i);
+        nbFalse = 0;
 
-    /* find the rndth cell with value = false : */
-    for (j = 1; nbFalse < rnd; ++j)
-      if ( ! alreadyTaken[j] )
-        ++nbFalse;
-    --j;
+        /* find the rndth cell with value = false : */
+        for (j = 1; nbFalse < rnd; ++j)
+            if ( ! alreadyTaken[j] )
+                ++nbFalse;
+        --j;
 
-    sol[j] = i;
+        sol[j] = i;
 
-    ++nbj;
-    choosenNumber[nbj] = j;
+        ++nbj;
+        choosenNumber[nbj] = j;
 
-    alreadyTaken[j] = true;
-  }
+        alreadyTaken[j] = true;
+    }
+    return sol;
 }
 
 /* Create an output file for the iteration */
-void open_file(char **&argv, fstream &file) {
+void open_file(int argc, char **&argv, fstream &file) {
     char name[30] = "";
-    strcat(name,argv[1]);
-    strcat(name,argv[2]);
-    strcat(name, argv[3]);
-    strcat(name, argv[4]);
+    for (int i=1; i < argc-1; i++) {
+        strcat(name,argv[i]);
+    }
     file.open(name, ios::trunc|ios::out);
 }
 
@@ -131,24 +133,27 @@ vector<string> parseArg(int argc, char **argv) {
     bool all_good = true;
     if (argc < 2) all_good = false;
     else parameter.emplace_back((string)argv[1]);
-    if (all_good and argc == 5 and (string)argv[1] == "--ii") {
+    if (all_good and argc >= 5 and (string)argv[1] == "--ii") {
         cout << "ii" << endl;
-        if ((string)argv[2] == "--first" or (string)argv[2] == "--best") parameter.emplace_back((string)argv[2]);
         if ((string)argv[3] == "--exchange" or (string)argv[3] == "--transpose" or (string)argv[3] == "--insert") parameter.emplace_back((string)argv[3]);
+        if ((string)argv[2] == "--first" or (string)argv[2] == "--best") parameter.emplace_back((string)argv[2]);
         if ((string)argv[4] == "--srz" or (string)argv[4] == "--rand") parameter.emplace_back((string)argv[4]);
         if (parameter.size() != 4) all_good = false;
-    } else if (all_good and argc == 3 and (string)argv[1] == "--vnd") {
+    } else if (all_good and argc >= 3 and (string)argv[1] == "--vnd") {
         cout << "vnd" << endl;
-        parameter.emplace_back("--first");
         if ((string)argv[2] == "--tie" or (string)argv[2] == "--tei" or argv[3]) parameter.emplace_back((string)argv[3]);
+        parameter.emplace_back("--first");
         parameter.emplace_back("--srz");
         if (parameter.size() != 4) all_good = false;
-    } else if (all_good and argc == 2 and (string)argv[1] == "--ils") {
+    } else if (all_good and argc >= 2 and (string)argv[1] == "--ils") {
         cout << "ils" << endl;
-        parameter.emplace_back("--first");
         parameter.emplace_back("--tie");
+        parameter.emplace_back("--first");
         parameter.emplace_back("--srz");
-    } else all_good = false;
+    } else if (all_good and argc >= 2 and (string)argv[1] == "--ma") {
+        cout << "ma" << endl;
+    }
+    else all_good = false;
 
     if (!all_good) {
         cout
@@ -164,13 +169,21 @@ vector<string> parseArg(int argc, char **argv) {
 
 int main(int argc, char **argv)
 {
+    cout << endl;
     vector<string> parameters = parseArg(argc, argv);
     // Prepare the output file
     string path = "PFSP_instances";
     fstream fout;
-    open_file(argv, fout);
+    open_file(argc, argv, fout);
 
+    // Instances to do
     vector<string> instances = readDirectory(path);
+    instances = {(string)argv[argc -1]};
+    //instances = {"PFSP_instances/DD_Ta081.txt"};
+
+    // Number of runs to do on each instances
+    int run_nb = 5;
+    //int run_nb = stoi((string)argv[argc - 1]);
 
     // Start to iterate the run on each instance file
     for (const basic_string<char>& entry : instances) {
@@ -183,8 +196,8 @@ int main(int argc, char **argv)
         }
 
         // Loop 5 times through the full run
-        for (int ite = 0; ite < 5; ite++) {
-
+        for (int ite = 0; ite < run_nb; ite++) {
+            cout << "Run: " << ite+1 << endl;
             /* Start the clock */
             auto start = high_resolution_clock::now();
 
@@ -201,22 +214,39 @@ int main(int argc, char **argv)
 
             /* Prepare the input for the instance */
 
+            int time;
+            if (instance.getNbJob() == 50) time = 225; //sec
+            else time = 6205; //sec
             long score = 0;
-            if (parameters[0] == "--rand") {
+            if (parameters[3] == "--rand") {
                 /* Fill the vector with a random permutation */
-                randomPermutation(instance.getNbJob(), solution);
-            } else if (parameters[0] == "--srz") {
+                solution = randomPermutation(instance.getNbJob());
+            } else if (parameters[3] == "--srz") {
                 /* Fill the vector with the simplified RZ heuristic solution */
                 simpRZsolution(instance.getNbJob(), solution, instance);
             }
             if (parameters[0] == "--ils") {
                 parameters[0] = "--vnd";
-                ILS ils_instance = ILS(solution, instance, parameters, 1e0);
+                ILS ils_instance = ILS(solution, instance, parameters, time);
                 ils_instance.run();
 
                 solution = ils_instance.getCurrentSolution();
                 score = ils_instance.getCurrentScore();
-            } else {
+                parameters[0] = "--ils";
+            } else if (parameters[0] == "--ma") {
+                vector<vector<int>> rand_population;
+                vector<int> rand_solution;
+                for (int i=0; i < 100; i++) {
+                    rand_solution = randomPermutation(instance.getNbJob());
+                    rand_population.emplace_back(rand_solution);
+                }
+                MA ma_instance = MA(rand_population, instance, time/10);
+                ma_instance.run();
+
+                solution = ma_instance.get_best_solution();
+                score = ma_instance.get_best_score();
+            }
+            else {
                 /* Create instance object */
                 FlowshopInstance flowshopInstance = FlowshopInstance(solution, instance, parameters);
 
@@ -231,10 +261,11 @@ int main(int argc, char **argv)
             auto duration = duration_cast<microseconds>(stop - start);
 
             /* Compute the WT of this solution */
-            /*cout << "Total weighted tardiness: " << score << endl;
-            cout << "Total run time: " << duration.count() << " microseconds" << endl;*/
+            /*cout << "Total weighted tardiness: " << score << endl;*/
+//            cout << "Total run time: " << duration.count() << " microseconds" << endl;
 
             // Output result in the file
+
             fout << entry << ", " << score << ", " << duration.count() << "\n";
         }
     }

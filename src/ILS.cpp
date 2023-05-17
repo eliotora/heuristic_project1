@@ -27,7 +27,7 @@ void ILS::run() {
         working_instance.perturbation(gamma);
         working_instance.run();
         acceptance_criterion();
-        //cout << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - begin).count() << endl;
+//        cout << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - begin).count() << "seconds over " << maxTime << " seconds " << endl;
     } while (std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - begin).count() < maxTime);
 }
 

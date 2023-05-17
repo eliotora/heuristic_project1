@@ -12,8 +12,7 @@
 class MA {
 private:
     long maxTime;
-    int populationMaxSize = 20;
-    float mutation_prob = 1/100;
+    float mutation_prob = 0.05;
     vector<string> parameters;
     PfspInstance pfspInstance;
     vector<FlowshopInstance> sp, spr, spm; // starting population, starting population recombination, starting population mutated
