@@ -10,6 +10,7 @@ ILS::ILS(vector<int>& s, PfspInstance pfspInstance, vector<string>& parameters, 
 working_instance(s, pfspInstance, parameters) {
     best_so_far_solution = s;
     current_solution = s;
+    // Initialise temperature
     temp = lambda * (pfspInstance.getTotalJobTime())/(10*pfspInstance.getNbJob()*pfspInstance.getNbMac());
     maxTime = time;
 }
@@ -17,6 +18,9 @@ working_instance(s, pfspInstance, parameters) {
 ILS::~ILS() {}
 
 void ILS::run() {
+    /*
+     * Main function of the ILS method
+     */
     auto begin = std::chrono::high_resolution_clock::now();
     working_instance.run();
     current_solution = working_instance.getCurrentSolution();

@@ -3,6 +3,7 @@ import os
 from subprocess import call
 import csv
 
+
 def compile_results(output_filename, input_prefix):
     input_file_names = [file_name for file_name in os.listdir() if input_prefix in file_name]
     input_file_names.sort()
@@ -17,10 +18,8 @@ def compile_results(output_filename, input_prefix):
                     print(row.strip("\n").split(", "))
                     out_writer.writerow(row.strip("\n").split(", "))
 
-    for input_file in   input_file_names:
+    for input_file in input_file_names:
         os.remove(input_file)
-
-
 
 
 def run_with_args(call_args):
@@ -35,17 +34,19 @@ if __name__ == "__main__":
     print(instances)
 
     processes = list()
-    for instance in instances:
+    for instance in instances[:10]:
         print(instance)
-        p = multiprocessing.Process(target=run_with_args, args=(["./pfspwt", "--ma", "--"+instance, path+"/"+instance],))
+        p = multiprocessing.Process(target=run_with_args,
+                                    args=(["./pfspwt", "--ils", "--" + instance, path + "/" + instance],))
         processes.append(p)
 
+    print("here")
     for i in range(len(processes)//10):
-        for p in processes[i*10:i*10+10]:
+        for p in processes[i * 10:i * 10 + 10]:
             p.start()
 
-        for p in processes[i*10:i*10+10]:
+        for p in processes[i * 10:i * 10 + 10]:
             p.join()
 
-    compile_results("MA_results/ma_results_time_div_10", "--ma--DD")
 
+    compile_results("ILS_results/ils_results_time_normal_bestimprove", "--ils--DD")

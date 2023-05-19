@@ -164,10 +164,10 @@ long FlowshopInstance::getCurrentScore() {
 }
 
 
-/* ILS part:
+/* ILS & MA part:
  * Perturbation implementation via multiple random insertions */
 void FlowshopInstance::perturbation(int nbrPerturbation) {
-    for (int _ = 0; _ < 2; _++) {
+    for (int _ = 0; _ < nbrPerturbation; _++) {
         int i = rand() % starting_solution.size();
         int j = rand() % starting_solution.size();
         while (j==i) j = rand() % starting_solution.size();

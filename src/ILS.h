@@ -27,7 +27,6 @@ public:
     ILS(vector<int>& s, PfspInstance pfspInstance, vector<string>& parameters, long time);
     ~ILS();
     void run();
-    bool termination_condition();
     void acceptance_criterion();
     vector<int> getCurrentSolution();
     long getCurrentScore();

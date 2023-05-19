@@ -225,6 +225,8 @@ int main(int argc, char **argv)
                 /* Fill the vector with the simplified RZ heuristic solution */
                 simpRZsolution(instance.getNbJob(), solution, instance);
             }
+
+
             if (parameters[0] == "--ils") {
                 parameters[0] = "--vnd";
                 ILS ils_instance = ILS(solution, instance, parameters, time);
@@ -240,7 +242,7 @@ int main(int argc, char **argv)
                     rand_solution = randomPermutation(instance.getNbJob());
                     rand_population.emplace_back(rand_solution);
                 }
-                MA ma_instance = MA(rand_population, instance, time/10);
+                MA ma_instance = MA(rand_population, instance, time);
                 ma_instance.run();
 
                 solution = ma_instance.get_best_solution();

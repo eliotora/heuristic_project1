@@ -67,6 +67,9 @@ vector<int> MA::cross_over_operator(vector<int> genome1, vector<int> genome2) {
 }
 
 void MA::mutation() {
+    /*
+     * Mutation is two steps in the insert neighbourhood
+     */
     for (auto elem: sp) {
         if (rand()/RAND_MAX < mutation_prob) {
             elem.perturbation(2); // Mutation consists of two random insertion move
@@ -76,6 +79,9 @@ void MA::mutation() {
 }
 
 void MA::run() {
+    /*
+     * Main function of the MA method
+     */
     auto begin = std::chrono::high_resolution_clock::now();
     for (auto elem: sp) elem.run();
     do {
